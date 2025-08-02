@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id-ID">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LYRA | AI Shopping Assistant (Ionic + Gemini)</title>
+    
+    <!-- Ionic CDN -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts & Custom Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <ion-app>
+        <ion-split-pane content-id="main-content" when="md">
+            <!-- Sidebar Menu -->
+            <ion-menu content-id="main-content" type="overlay">
+                <ion-content>
+                    <div class="flex flex-col h-full bg-white">
+                        <!-- Profile Section -->
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex items-center space-x-3">
+                                <ion-avatar class="w-10 h-10">
+                                    <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=android" alt="Avatar">
+                                </ion-avatar>
+                                <div>
+                                    <p class="font-medium text-gray-900">Android Butut</p>
+                                    <p class="text-xs text-gray-500">@androidbutut@gmail.com</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <ion-icon name="cart-outline" class="text-gray-400 mr-2"></ion-icon>
+                                    <span class="text-sm text-gray-600">Total Order <span class="simpleCart_quantity text-sm text-red-600"></span></span>
+                                </div>
+                                <ion-button color="primary" title="Login Dengan Google">
+                    <ion-icon slot="start" name="logo-google"></ion-icon>
+                                    <ion-label class="text-white text-xs font-bold">Login</ion-label>
+                                </ion-button>
+                            </div>
+                        </div>
+                            <div class="keranjang-box simplecart-cart">
+                                <ion-card class="simpleCart_items" style="box-shadow:none;background:transparent;"></ion-card>
+                            <ion-footer class="ion-no-border fixed bottom-0 left-0 ck-btn bg-white p-4">
+                            <ion-toolbar class="ion-no-border">
+                                <div class="harga-total">
+                                <span>Grand Total: </span><span class="simpleCart_quantity"></span> items = <span class="simpleCart_grandTotal"></span><br/>
+                                <ion-text><sub>*Belum Termasuk Ongkir</sub></ion-text>
+                                </div>
+                            <ion-button title="Checkout" flex-fill slot="end" class="close-keranjang" onclick="toggleCart()">
+                                <ion-icon slot="icon-only" name="bag-check-outline"></ion-icon>
+                            </ion-button>
+                            </ion-toolbar>
+                            </ion-footer>
+                            </div>
+                        <script>
+                        function toggleCart() {
+                            window.location.href = "/checkout.html";
+                        }
+                        </script>
+                    </div>
+                </ion-content>
+            </ion-menu>
+
+            <!-- Main Content -->
+            <div class="ion-page" id="main-content">
+                <ion-header class="text-gray-700">
+                    <ion-toolbar class="text-gray-700">
+                        <ion-buttons slot="start" color="primary">
+                            <ion-menu-button></ion-menu-button>
+                        </ion-buttons>
+<ion-title>
+                        <div class="flex items-center">
+                            <img src="https://lyra-ai-nine.vercel.app/logo.png" alt="LYRA Logo" class="rounded-full h-6 mr-2">
+                            <span class="text-gray-700 font-bold tracking-wider">L Y Я A</span>
+                        </div>
+</ion-title>
+                        <ion-buttons slot="end">
+                            <div class="flex items-center space-x-4 px-4">
+                               <ion-button class="relative">
+                                    <ion-icon slot="icon-only" name="notifications-outline" color="primary"></ion-icon>
+                                    <ion-badge color="danger" class="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2"></ion-badge>
+                               </ion-button>
+                               <ion-avatar class="h-8 w-8 hidden md:block">
+                                    <img src="https://api.dicebear.com/7.x/thumbs/svg?seed=android" alt="User">
+                               </ion-avatar>
+                            </div>
+                        </ion-buttons>
+                    </ion-toolbar>
+                </ion-header>
+                
+                <ion-content class="main-content">
+                   <div class="flex h-full">
+                        <!-- Products Section -->
+                        <div class="flex-1 overflow-y-auto">
+                            <div class="max-w-7xl mx-auto">
+                                <div class="flex p-2 gap-3 flex-wrap justify-between items-center mb-4">
+                                    <ion-searchbar id="product-searchbar" placeholder="Search products..." class="w-full md:max-w-xs"></ion-searchbar>
+                                    <p id="toggle-stok" class="cursor-pointer hidden lg:block bg-purple-100 text-purple-800 px-3 py-2.5 rounded-full text-sm">Tampilkan yang tersedia</p>
+                                </div>
+
+                                <!-- Product Grid -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6" id="product-grid">
+                                    <!-- Product Cards diisi JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Assistant Panel (Desktop) -->
+                      <div id="desktop-chat-panel" class="hidden lg:flex w-96 border-l border-gray-200 bg-white flex-col h-full" >
+                            <div class="p-1 border-b border-gray-200 flex-shrink-0">
+                                <div class="flex items-center justify-between">
+                                    <img src="https://lyra-ai-nine.vercel.app/logo.png" alt="LYRA" class="rounded-full h-10 mr-2">
+                                    <div class="flex flex-1 flex-col text-sm text-gray-700">
+                                        <span class="font-semibold text-gray-900">L Y Я A Assistant</span>
+                                            <span id="ai-active-time" class="mt-1.5 text-xs">🕛️Active --:--</span>
+                                            <span id="ai-online-indicator" class="mt-1.5 text-xs hidden">🟢 Online</span>
+                                    </div>
+                                  <ion-buttons>
+                                      <ion-button id="clear-chat-desktop" color="danger" title="Hapus Chat" fill="clear">
+                                          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                                      </ion-button>
+                                  </ion-buttons>
+                                </div>
+                            </div>
+                            <div id="chat-messages-desktop" class="flex-1 overflow-y-auto py-2 px-4 space-y-4 scrollbar-hide">
+                                <!-- Pesan akan dimuat secara dinamis oleh JS -->
+                            </div>
+                            <div class="p-4 pt-0 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+                                <small id="footer" class="footer text-xs text-gray-500">DaffaDev</small>
+                                <div class="relative flex items-center">
+                                    <input id="chat-input-desktop" type="text" placeholder="Tanyakan apapun..." class="w-full pl-4 pr-12 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                  <ion-buttons>
+                                    <ion-button id="chat-send-btn-desktop" fill="clear" class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-500">
+                                        <ion-icon slot="icon-only" name="send"></ion-icon>
+                                    </ion-button>
+                                  </ion-buttons>
+                                </div>
+                            </div>
+                      </div>
+                   </div>
+                </ion-content>
+
+                <!-- Mobile Chat FAB -->
+                <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="lg:hidden">
+                    <ion-fab-button class="" id="open-mobile-chat">
+                        <ion-icon name="chatbubbles-outline"></ion-icon>
+                    </ion-fab-button>
+                </ion-fab>
+                
+                <!-- Gemini Description Modal -->
+                <ion-modal id="description-modal">
+                    <ion-header>
+                        <ion-toolbar>
+                            <ion-title id="modal-title">Detail Produk</ion-title>
+                            <ion-buttons slot="end">
+                                <ion-button color="danger" onclick="document.getElementById('description-modal').dismiss()">
+                                    <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+                                </ion-button>
+                            </ion-buttons>
+                        </ion-toolbar>
+                    </ion-header>
+                    <ion-content class="ion-padding">
+                        <div id="product-detail-content-wrapper" class="bg-white rounded-lg shadow-lg overflow-hidden">
+                            <img id="product-image-modal" src="" alt="Gambar Produk" class="w-full h-80 object-cover">
+                            <div class="p-4">
+                                <h2 id="product-name-modal" class="text-3xl text-gray-600 font-bold mb-2"></h2>
+                                <div class="flex justify-between items-center mb-2">
+                                    <div class="grid grid-rows-2 gap-2">
+                                    <span id="product-original-price-modal" class="text-red-500 line-through text-lg ml-2 hidden"></span>
+                                    <span id="product-price-modal" class="text-purple-600 text-2xl font-bold"></span>
+                                    </div>
+                                <p id="product-stock-modal" class="text-gray-600 mb-2"></p>
+                                </div>
+                                <div id="product-description-modal" class="text-gray-700 leading-relaxed mb-4 prose max-w-none"></div>
+                                <div class="mb-4">
+                                    <ion-label class="block text-sm font-medium text-gray-700 mb-1">Pilihan Warna:</ion-label>
+                                <div id="product-colors-modal" class="grid grid-cols-3 gap-2 mb-2 hidden"></div>
+                                </div>
+                                <div id="product-sizes-modal" class="mb-4 hidden"></div>
+                                
+                                </div>
+                        </div>
+                    </ion-content>
+                </ion-modal>
+
+                <!-- Mobile Chat Modal -->
+                <ion-modal id="mobile-chat-modal" class="h-full">
+                            <ion-header>
+                                <ion-toolbar class="text-gray-700">
+                                    <ion-buttons slot="start">
+                                        <ion-button onclick="dismissModal('mobile-chat-modal')" title="Lihat Product dan Keranjang">
+                                    <ion-badge color="danger" class="simpleCart_quantity absolute top-1 right-1 transform translate-x-1/2 -translate-y-1/2"></ion-badge>
+                                            <ion-icon slot="icon-only" name="storefront-outline"></ion-icon>
+                                        </ion-button>
+                                    </ion-buttons>
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex flex-1 flex-col text-sm text-gray-700">
+                                            <span class="font-semibold text-gray-900">L Y Я A Assistant</span>
+                                                <span id="ai-active-mobile" class="mt-1.5 text-xs">🕛️Active --:--</span>
+                                                <span id="ai-online-mobile" class="mt-1.5 text-xs hidden">🟢 Online</span>
+                                        </div>
+                                        <ion-buttons slot="end">
+                                            <ion-button id="clear-chat-mobile" title="Hapus Chat" fill="clear" color="danger">
+                                                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                                            </ion-button>
+                                        </ion-buttons>
+                                    </div>
+                                </ion-toolbar>
+                            </ion-header>
+                            <ion-content class="ion-padding bg-gray-50">
+                                <div id="chat-messages-mobile" class="h-full flex flex-col space-y-4 py-2 px-1 scrollbar-hide overflow-y-auto">
+                                </div>
+                            </ion-content>
+                            <ion-footer class="ion-no-border bg-white p-4">
+                                <small id="footer" class="footer text-xs text-gray-500">DaffaDev</small>
+                                <div class="relative flex items-center">
+                                    <input id="chat-input-mobile" type="text" placeholder="Tanyakan apapun..." class="w-full pl-4 pr-12 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    <ion-buttons>
+                                        <ion-button id="chat-send-btn-mobile" fill="clear" class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-500">
+                                            <ion-icon slot="icon-only" name="send"></ion-icon>
+                                        </ion-button>
+                                    </ion-buttons>
+                                </div>
+                            </ion-footer>
+                </ion-modal>
+
+            </div>
+        </ion-split-pane>
+    </ion-app>
+
+    <script src="/simpleCart.js"></script>
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

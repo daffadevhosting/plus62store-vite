@@ -65,7 +65,39 @@ export function processAiCartAction(actionData, targetChatMessages) {
             break;
 
         case 'updateCartQuantity':
-            // ...
+            const { productName, newQuantity, warna, ukuran } = actionData;
+
+            if (!productName || newQuantity === undefined) {
+                appendMessage("Maaf, saya perlu nama produk dan jumlah baru untuk mengubah keranjang.", 'ai', targetChatMessages);
+                break;
+            }
+
+            let itemToUpdate = null;
+            simpleCart.each(item => {
+                const matchesName = item.get('name') === productName;
+                const matchesWarna = warna ? item.get('warna') === warna : true;
+                const matchesUkuran = ukuran ? item.get('ukuran') === ukuran : true;
+
+                if (matchesName && matchesWarna && matchesUkuran) {
+                    itemToUpdate = item;
+                    return;
+                }
+            });
+
+            if (itemToUpdate) {
+                const oldQuantity = itemToUpdate.get('quantity');
+                if (newQuantity > 0) {
+                    itemToUpdate.quantity(newQuantity);
+                    simpleCart.trigger('update'); // Memicu event update secara eksplisit
+                    appendMessage(`Baik, jumlah untuk ${productName} ${warna ? `(warna ${warna})` : ''} telah diubah dari ${oldQuantity} menjadi ${newQuantity}.`, 'ai', targetChatMessages);
+                } else {
+                    itemToUpdate.remove();
+                    simpleCart.trigger('update'); // Memicu event update setelah menghapus
+                    appendMessage(`Baik, saya telah menghapus ${productName} ${warna ? `(warna ${warna})` : ''} dari keranjang sesuai permintaan.`, 'ai', targetChatMessages);
+                }
+            } else {
+                appendMessage(`Maaf, saya tidak dapat menemukan ${productName} ${warna ? `warna ${warna}` : ''} di keranjang Anda untuk diubah.`, 'ai', targetChatMessages);
+            }
             break;
 
         case 'emptyCart':
@@ -104,7 +136,12 @@ export function processAiCartAction(actionData, targetChatMessages) {
             break;
 
         case 'checkout':
-            // ...
+            appendMessage("Tentu, saya akan mengarahkan Anda ke halaman pembayaran sekarang.", 'ai', targetChatMessages);
+            // Tunggu sebentar agar pesan sempat terbaca, lalu redirect.
+            setTimeout(() => {
+                window.location.href = '/checkout.html';
+            }, 2500);
+            redirected = true; // Tandai bahwa pengalihan terjadi
             break;
 
         default:

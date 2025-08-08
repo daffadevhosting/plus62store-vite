@@ -59,7 +59,7 @@ export function appendMessage(text, sender, targetChatMessages, isHistorical = f
         <div class="flex items-center justify-center h-8 w-8 rounded-full ${sender === 'user' ? 'bg-purple-500' : 'bg-blue-600'} text-white text-lg font-bold flex-shrink-0">
             ${sender === 'user' ? '<ion-icon name="person-outline"></ion-icon>' : '<ion-icon name="sparkles-outline"></ion-icon>'}
         </div>
-        <div class="relative text-sm py-2 px-4 shadow rounded-xl ${sender === 'user' ? 'relative chat-bubble-user rounded-br-none mr-3' : 'chat-bubble-ai rounded-bl-none ml-3'} max-w-[80%]">
+        <div class="relative text-sm py-2 px-4 shadow rounded-xl ${sender === 'user' ? 'relative chat-bubble-user rounded-tr-none mr-3' : 'chat-bubble-ai rounded-bl-none ml-3'} max-w-[80%]">
             <div class="prose max-w-none break-words">${contentHtml}</div>
         </div>
     `;
@@ -329,7 +329,7 @@ export async function renderProducts(keyword = "", productGridElement, showAvail
           <ion-card-subtitle class="text-purple-600 font-bold mt-1">Rp ${product.discount}</ion-card-subtitle>
         </ion-card-header>
         <ion-card-content>
-          <div class="flex justify-end-safe items-center">
+          <div class="flex justify-end items-center">
             <ion-button fill="outline" size="small" color="primary" class="ask-ai-btn">
               <ion-icon name="sparkles-outline" slot="start"></ion-icon>
               Tanya AI

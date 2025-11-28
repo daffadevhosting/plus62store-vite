@@ -22,4 +22,4 @@ export const AI_ONLINE_MOBILE_ID = 'ai-online-mobile';
 
 // --- API and URLs ---
 export const PRODUCT_LISTING_URL = "https://plus62store.github.io/products.json";
-export const currentApiUrl = "https://p62s-next.vercel.app";
+export const currentApiUrl = "gemini.sendaljepit.workers.dev";
